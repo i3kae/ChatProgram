@@ -31,7 +31,7 @@ int main(int argc, char **argv)
 
 	hThrd_Word = CreateThread(NULL, 0, (DWORD WINAPI)Word_Chain,0, 0, &threadId_Word);
 
-	Sleep(10000000000000000);
+	Sleep(1000000000000);
 }
 
 void Word_Chain(LPVOID n)
@@ -100,23 +100,33 @@ void Word_Chain(LPVOID n)
 				input_flag = 1;
 			}
 			else if (word_flag == -1) // 사전이 없을 경우
-				return 0;
+				exit(EXIT_SUCCESS);
 
 			if (input_flag == 0)
 			{
 				strcpy(Prev_input, Player_input);
 				Chain = 1;
 			}
+
+			//플레이어들의 라이프 상태 체크
+			for (j = 0, flag = 0; j < player_count; j++)
+			{
+				if (Players[j].life == 0)
+					flag++;
+			}
+
+			if (flag == player_count - 1) // 한명을 제외한 모든 플레이어의 라이프가 0일 경우
+				break;
 		}
 
 		//플레이어들의 라이프 상태 체크
-		for (i = 0, flag = 0; i < player_count; i++)
+		for (j = 0, flag = 0; j < player_count; j++)
 		{
-			if (Players[i].life == 0)
+			if (Players[j].life == 0)
 				flag++;
 		}
 
-		if (flag == player_count - 1) // 모든 플레이어의 라이프가 0일 경우
+		if (flag == player_count - 1) // 한명을 제외한 모든 플레이어의 라이프가 0일 경우
 			break;
 
 	}
@@ -165,3 +175,7 @@ int Word_Check(char *input)
 	return 1;
 }
 
+void Chating(LPVOID n)
+{
+
+}
