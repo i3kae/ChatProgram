@@ -2,18 +2,46 @@
 #include <stdlib.h>
 #include <Windows.h>
 #define WIN32_LEAN_AND_MEAN
-#define PRINT_WORD_CHAIN_X 40
+#define PRINT_WORD_CHAIN_X 50
 DWORD WINAPI ThreadFunc(LPVOID);
 // DWORD는 더블워드 == long
 // WINAPI 윈도우에서의 API
 //LPVOID ms에서 사용하는 void포인터
 
+int Chating_line = 0;
 char Chat[101];
-char Chatingchang[20][32];
+
+// 출력될 채팅창 초기화
+char Chatingchang[20][32] = 
+{
+	"  ",
+	"  ",
+	"  ",
+	"  ",
+	"  ",
+	"  ",
+	"  ",
+	"  ",
+	"  ",
+	"  ",
+	"  ",
+	"  ",
+	"  ",
+	"  ",
+	"  ",
+	"  ",
+	"  ",
+	"  ",
+	"  ",
+	"  "
+};
+
+//끝말잇기와 채팅의 이벤트와 쓰레드정보를 담을 변수
 HANDLE hThrd_Word, hThrd_Chating;
 HANDLE WORD_EVENT, CHATING_EVENT;
 DWORD threadId_Word, threadId_Chating;
 
+//플레이어의 정보를 담을 구조체
 typedef struct player
 {
 	char name[21];
@@ -33,12 +61,15 @@ int main(int argc, char **argv)
 {
 	int i;
 
+	//쓰레드를 생성
 	hThrd_Word = CreateThread(NULL, 0, (DWORD WINAPI)Word_Chain, 0, 0, &threadId_Word);
 	hThrd_Chating = CreateThread(NULL, 0, (DWORD WINAPI)Chating, 0, 0, &threadId_Chating);
 
+	//쓰레드를 정지 시키고 실행할 이벤트 설정
 	WORD_EVENT = CreateEvent(NULL, TRUE, FALSE, NULL);
 	CHATING_EVENT = CreateEvent(NULL, TRUE, FALSE, NULL);
 
+	//끝말잇기 함수가 끝나면 프로세스 종료
 	WaitForSingleObject(hThrd_Word, INFINITE);
 }
 
@@ -106,16 +137,18 @@ void Word_Chain(LPVOID n)
 
 			printf("플레이어 %s님 입력해주세요 : ", Players[i].name);
 
+			//WORD_EVENT를 설정함으로 Chating함수를 실행 시키고 CHATING_EVENT를 초기화 한 후 CHATING_EVENT신호가 올때까지 대기  
 			SetEvent(WORD_EVENT);
 			ResetEvent(CHATING_EVENT);
 			WaitForSingleObject(CHATING_EVENT, INFINITE);
 
+			//입력한 문자열의 맨앞부분이 !면 끝말잇기로 처리 아니면 채팅으로 처리
 			if (Chat[0] == '!')
 			{
 				if (Chain != 0) // 첫 유저의 경우 아무 단어나 입력 가능
 				{
 					//전 입력 끝 단어와 현 입력 첫 단어 비교
-					if (Player_input[0] != Prev_input[strlen(Prev_input) - 2])
+					if (Chat[1] != Prev_input[strlen(Prev_input) - 2])
 					{
 						Clear_line(PRINT_WORD_CHAIN_X, 9);
 						gotoxy(PRINT_WORD_CHAIN_X, 9);
@@ -141,7 +174,7 @@ void Word_Chain(LPVOID n)
 				{
 					for (k = 1; k < 32; k++)
 					{
-						Prev_input[k-1] = Chat[k];
+						Prev_input[k - 1] = Chat[k];
 					}
 					Chain = 1;
 				}
@@ -156,13 +189,29 @@ void Word_Chain(LPVOID n)
 				if (flag == player_count - 1) // 한명을 제외한 모든 플레이어의 라이프가 0일 경우
 					break;
 			}
-
-			else
+			else // 채팅 출력부분
 			{
-				i--;
-				Clear_line(1, 1);
-				gotoxy(1, 1);
-				printf("%s", Chat);
+				for (k = 19; k >= 0; k--)
+				{
+					if (k == 0) // 맨 아래 채팅창의 배열에 입력된 문자열을 대입
+					{
+						strcpy(Chatingchang[k], Players[i].name);
+						strcat(Chatingchang[k], " : ");
+						strcat(Chatingchang[k], Chat);
+					}
+					else // 아닐경우 채팅창 배열을 한칸씩 올림
+					{
+						strcpy(Chatingchang[k], Chatingchang[k - 1]);
+					}
+
+					//현재 위치의 화면 초기화 및 이동, 맨위 부터 출력
+					Clear_line(1, 20 - k);
+					gotoxy(1, 20 - k);
+
+					printf("%s", Chatingchang[k]);
+				}
+
+				i--; //채팅을 친 플레이어의 차례가 다시 돌아오도록
 			}
 		}
 
@@ -190,6 +239,7 @@ void Word_Chain(LPVOID n)
 		}
 	}
 
+	//이 쓰레드가 끝났다고 알림
 	SetEvent(hThrd_Word);
 }
 
@@ -211,14 +261,15 @@ int Word_Check(char *input, char *prev_word)
 		return -1;
 	}
 
+	//입력된 문자열에서 !를 제거
 	for (i = 1; i < 32; i++)
 		Player_input[i - 1] = input[i];
 
 	//사전을 검색 중 단어가 있으면 0을 리턴
 	while (!feof(file_pointer))
 	{
-		fgets(file_load, 99, file_pointer);
-		if (!strcmp(file_load, Player_input))
+		fgets(file_load, 99, file_pointer); //파일에서 한줄씩 입력
+		if (!strcmp(file_load, Player_input)) //파일에있는 문자열중 하나라고 Player_input과 같은 것이 있으면
 		{
 			Clear_line(PRINT_WORD_CHAIN_X, 9);
 			gotoxy(PRINT_WORD_CHAIN_X, 9);
@@ -234,37 +285,45 @@ int Word_Check(char *input, char *prev_word)
 	return 1;
 }
 
+//커서 이동 함수
 void gotoxy(int x, int y)
 {
 	COORD pos = { x - 1, y - 1 };
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
 }
 
+//x,y위치 화면 초기화
 void Clear_line(x, y)
 {
 	gotoxy(x, y);
 	printf("                                                            ");
 }
 
+//채팅 입력
 void Chating(LPVOID n)
 {
-	FILE *file_pointer;
+	FILE *fp;
 
-	if (file_pointer = fopen("Chating_Log.txt", "a") == NULL)
+	fp = fopen("Chating_Log.txt", "w"); // 파일을 온리 쓰기형으로 염
+
+	if (fp == NULL)
 	{
 		printf("파일 읽기 오류");
 		return;
 	}
 
+	//채팅 입력 부분
 	while (1)
 	{
-		ResetEvent(WORD_EVENT);
-		WaitForSingleObject(WORD_EVENT, INFINITE);
+		//WORD_EVENT이벤트를 초기화하고 WORD_EVENV에 신호가 올떄까지 대기후
+		ResetEvent(WORD_EVENT); //WORD_EVENT이벤트를 초기화
+		WaitForSingleObject(WORD_EVENT, INFINITE); //WORD_EVENT이벤트에 신호가 올떄까지 대기
 		gotoxy(PRINT_WORD_CHAIN_X + 28, 15);
-		fgets(Chat, 100, stdin);
-		SetEvent(CHATING_EVENT);
+		fgets(Chat, 30, stdin);
+		fprintf(fp, "%s", Chat); // 파일에 입력
+		SetEvent(CHATING_EVENT); // CHATRING_EVENT로 신호를 보냄
 	}
 
-	fclose(file_pointer);
-	SetEvent(hThrd_Chating);
+	fclose(fp); //fp파일을 닫아줌
+	SetEvent(hThrd_Chating); //현재 쓰레드가 끝났다고 알림
 }
