@@ -1,31 +1,39 @@
-
 #include<stdio.h>
 #include<stdlib.h>
 #include<winsock2.h>
 #include<Windows.h>
 #include<string.h>
+
 #define WIN32_LEAN_AND_MEAN
 #define PRINT_WORD_CHAIN_X 50
+
 DWORD WINAPI ThreadFunc(LPVOID);
-// DWORD´Â ´õºí¿öµå == long
-// WINAPI À©µµ¿ì¿¡¼­ÀÇ API
-//LPVOID ms¿¡¼­ »ç¿ëÇÏ´Â voidÆ÷ÀÎÅÍ
+
+// DWORDëŠ” ë”ë¸”ì›Œë“œ == long
+// WINAPI ìœˆë„ìš°ì—ì„œì˜ API
+//LPVOID msì—ì„œ ì‚¬ìš©í•˜ëŠ” voidí¬ì¸í„°
 
 typedef struct _packet {
-	int type; // 1ÀÌ¸é ´Ü¾îÀÔ·Â, 2ÀÌ¸é Ã¤ÆÃ
+	int type; // 1ì´ë©´ ë‹¨ì–´ì…ë ¥, 2ì´ë©´ ì±„íŒ…
 	char buffer[101];
-	char re[20];
-	char name[21];
 }Packet;
 
 void ErrorHandling(char* message);
 void gotoxy(int x, int y);
 void Clear_line(x, y);
+void Print_Word(LPVOID n);
+void Chating(LPVOID n);
 
 int Chating_line = 0;
 char Chat[101];
+HANDLE hThrd_Word, hThrd_Chating;
+DWORD threadId_Word, threadId_Chating;
+WSADATA wsaData;
+SOCKET hSocket;
+SOCKADDR_IN servAddr;
+Packet packet;
 
-// Ãâ·ÂµÉ Ã¤ÆÃÃ¢ ÃÊ±âÈ­
+// ì¶œë ¥ë  ì±„íŒ…ì°½ ì´ˆê¸°í™”
 char Chatingchang[20][32] =
 {
 	"  ",
@@ -50,15 +58,14 @@ char Chatingchang[20][32] =
 	"  "
 };
 
-int main(int argc, char* argv[]) {
-	WSADATA wsaData;
-	SOCKET hSocket;
-	SOCKADDR_IN servAddr;
-	int Player_life = 3, strLen, k;
-	char name[21];
-	Packet packet;
 
+int main() {
 	int strLen;
+	int argc;
+	char argv[10][1000];
+	argc = 3;
+	strcpy(argv[1], "127.0.0.1");
+	strcpy(argv[2], "5959");
 	if (argc != 3) {
 		printf("Usage : %s <IP> <port>\n", argv[0]);
 		exit(1);
@@ -80,75 +87,84 @@ int main(int argc, char* argv[]) {
 		ErrorHandling("connect() error!");
 	}
 
-	printf("´ç½ÅÀÇ ÀÌ¸§À» ÀÔ·ÂÇØ ÁÖ¼¼¿ä : ");
-	gets_s(packet.buffer, 20);
-	strcpy(name, packet.buffer);
-	send(hSocket, (char*)&packet, sizeof(Packet), 0);
+	//ì“°ë ˆë“œë¥¼ ìƒì„±
+	hThrd_Word = CreateThread(NULL, 0, (DWORD WINAPI)Print_Word, 0, 0, &threadId_Word);
+	hThrd_Chating = CreateThread(NULL, 0, (DWORD WINAPI)Chating, 0, 0, &threadId_Chating);
 
-	while (Player_life != 0)
-	{
-
-		if (!kbhit())
-		{
-			printf("%s : ", name);
-			gets_s(packet.buffer, 30);
-			sned(hSocket, (char*)&packet, sizeof(Packet), 0);
-		}
-		else
-		{
-			if ((strLen = recv(hSocket, (char*)&packet, sizeof(packet), 0)) != -1)
-				printf("ERROR!");
-			else
-			{
-				if (packet.type == 1)
-				{
-					
-				}
-				else if (packet.type == 2)
-				{
-					for (k = 19; k >= 0; k--)
-					{
-						if (k == 0) // ¸Ç ¾Æ·¡ Ã¤ÆÃÃ¢ÀÇ ¹è¿­¿¡ ÀÔ·ÂµÈ ¹®ÀÚ¿­À» ´ëÀÔ
-						{
-							strcpy(Chatingchang[k], packet.name);
-							strcat(Chatingchang[k], " : ");
-							strcpy(Chatingchang[k], packet.buffer);
-						}
-						else // ¾Æ´Ò°æ¿ì Ã¤ÆÃÃ¢ ¹è¿­À» ÇÑÄ­¾¿ ¿Ã¸²
-							strcpy(Chatingchang[k], Chatingchang[k - 1]);
-
-						//ÇöÀç À§Ä¡ÀÇ È­¸é ÃÊ±âÈ­ ¹× ÀÌµ¿, ¸ÇÀ§ ºÎÅÍ Ãâ·Â
-						Clear_line(1, 20 - k);
-						gotoxy(1, 20 - k);
-
-						printf("%s", Chatingchang[k]);
-					}
-				}
-			}
-		}
-
-	}
+	//ëë§ì‡ê¸° í•¨ìˆ˜ê°€ ëë‚˜ë©´ í”„ë¡œì„¸ìŠ¤ ì¢…ë£Œ
+	WaitForSingleObject(hThrd_Word, INFINITE);
 
 	closesocket(hSocket);
 	WSACleanup();
 	return 0;
 }
+
 void ErrorHandling(char* message) {
 	fputs(message, stderr);
 	fputc("\n", stderr);
 	exit(1);
 }
 
-//x,yÀ§Ä¡ È­¸é ÃÊ±âÈ­
+//x,yìœ„ì¹˜ í™”ë©´ ì´ˆê¸°í™”
 void Clear_line(x, y)
 {
 	gotoxy(x, y);
 	printf("                                                            ");
 }
 
-//Ä¿¼­ ÀÌµ¿ ÇÔ¼ö
+//ì»¤ì„œ ì´ë™ í•¨ìˆ˜
 void gotoxy(int x, int y)
 {
 	COORD pos = { x - 1, y - 1 };
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
+}
+
+void Print_Word(LPVOID n)
+{
+	int k, Player_life = 3,strLen;
+
+	while ((strLen = recv(hSocket, (char*)&packet, sizeof(Packet), 0)) != -1)
+	{
+		for (k = 19; k >= 0; k--)
+		{
+			if (k == 0) // ë§¨ ì•„ë˜ ì±„íŒ…ì°½ì˜ ë°°ì—´ì— ì…ë ¥ëœ ë¬¸ìì—´ì„ ëŒ€ì…
+				strcpy(Chatingchang[k], packet.buffer);
+			else // ì•„ë‹ê²½ìš° ì±„íŒ…ì°½ ë°°ì—´ì„ í•œì¹¸ì”© ì˜¬ë¦¼
+				strcpy(Chatingchang[k], Chatingchang[k - 1]);
+
+			//í˜„ì¬ ìœ„ì¹˜ì˜ í™”ë©´ ì´ˆê¸°í™” ë° ì´ë™, ë§¨ìœ„ ë¶€í„° ì¶œë ¥
+			Clear_line(1, 20 - k);
+			gotoxy(1, 20 - k);
+			printf("%s", Chatingchang[k]);
+		}
+	}
+
+	SetEvent(hThrd_Word);
+}
+
+void Chating(LPVOID n)
+{
+	int flag;
+	char Player_input[101], dump;
+
+	system("cls");
+	while (1)
+	{
+		Clear_line(1, 23);
+		gotoxy(1, 23);
+		scanf("%d%c", &flag,&dump);
+
+		switch (flag)
+		{
+		case 1:packet.type = 1; break;
+		case 2:packet.type = 2; break;
+		default:break;
+		}
+		Clear_line(1, 23);
+		gotoxy(1, 23);
+		printf("ì…ë ¥ : ");
+		gets_s(Player_input, 30);
+		
+		send(hSocket, (char*)&packet, sizeof(Packet), 0);
+	}
 }
