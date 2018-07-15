@@ -80,10 +80,6 @@ int main(int argc, char* argv[]) {
 		ErrorHandling("connect() error!");
 	}
 
-	if (strLen == -1) {
-		ErrorHandling("read() error!");
-	}
-
 	printf("당신의 이름을 입력해 주세요 : ");
 	gets_s(packet.buffer, 20);
 	strcpy(name, packet.buffer);
@@ -106,7 +102,7 @@ int main(int argc, char* argv[]) {
 			{
 				if (packet.type == 1)
 				{
-
+					
 				}
 				else if (packet.type == 2)
 				{
