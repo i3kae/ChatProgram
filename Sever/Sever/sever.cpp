@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
 		clientSocks[clientCount++] = sock;
 		//클라이언트 소켓배열에방금 가져온 소켓 주소를 전달
 		
-		hThread = (HANDLE)_beginthreadex(NULL, 0, HandleClient, (void*)&sock, 0, NULL);
+		hThread = (HANDLE)_beginthreadex(NULL, 0, HandleClient, (void*)&clientsock, 0, NULL);
 		//HandleClient 쓰레드 실행
 	}
 	closesocket(clientsock);
