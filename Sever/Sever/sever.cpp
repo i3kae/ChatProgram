@@ -1,4 +1,5 @@
 //원속 초기화 -> 소켓생성 -> bind->listen->accept-> 소켓해제->원속종료
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <winsock2.h>
 #include <string.h>
@@ -9,18 +10,26 @@
 
 #define BUF_SIZE 300
 
-unsigned WINAPI HandleClient(void* arg); //쓰레드 함수 
-//WINAPI : __stdcall
-//함수 반환값의 자료형, 함수호출규약, 매개변수의 자료형,개수 -> 함수의 원형
-void SendMsg(char* msg, int len);//메세지 보내는 함수
+char dictionary_list[1000000][30];
+int dictionary_count = 0;
+char word_list[1000000][30];
+int word_count = 0;
 
-int clientCount = 0;
-SOCKET clientSocks[30]; //클라이언트 소켓 보관용 배열
+void ReadWordList();
 
 typedef struct _packet {
 	int type; // 1이면 단어입력, 2이면 채팅
 	char buffer[100];
 }Packet;
+
+unsigned WINAPI HandleClient(void* arg); //쓰레드 함수 
+//WINAPI : __stdcall
+//함수 반환값의 자료형, 함수호출규약, 매개변수의 자료형,개수 -> 함수의 원형
+void SendMsg(Packet* packet, int len);//메세지 보내는 함수
+
+int clientCount = 0;
+SOCKET clientSocks[30]; //클라이언트 소켓 보관용 배열
+
 
 int main(int argc, char* argv[]) {
 	//1. 소켓프로그래밍의 함수를 사용하려면 구조체 선언(SOCKET)
@@ -38,6 +47,8 @@ int main(int argc, char* argv[]) {
 	int clientsize;
 	char message[] = "sucess";
 	HANDLE hThread;
+
+	ReadWordList();
 
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) //초기화
 	{
@@ -95,8 +106,7 @@ int main(int argc, char* argv[]) {
 		}
 		clientSocks[clientCount++] = sock;
 		//클라이언트 소켓배열에방금 가져온 소켓 주소를 전달
-		_beginthreadex_proc_type
-
+		
 		hThread = (HANDLE)_beginthreadex(NULL, 0, HandleClient, (void*)&sock, 0, NULL);
 		//HandleClient 쓰레드 실행
 	}
@@ -107,16 +117,35 @@ int main(int argc, char* argv[]) {
 }
 
 
+void ReadWordList()
+{
+	FILE *file_dictionary;
+	char buffer[30];
+	file_dictionary = fopen("dictionary.txt", "rt");
+	if (file_dictionary == NULL)
+	{
+		printf("File error");
+	}
+	//////////
+	//fscanf의 반환값은 성공적으로 읽힌 변수의 개수
+	//굉장히 많이 쓰이는 트릭임!
+	while (fscanf(file_dictionary, "%s", buffer) == 1) {
+		strcpy(word_list[word_count++], buffer);
+	}
+	//file_dictionary에서 읽어오는 즉시 word_list에 복사
+	//////////
+	fclose(file_dictionary);
+}
+
 unsigned WINAPI HandleClient(void* arg) {
 	SOCKET clientSock = *((SOCKET*)arg); //매개변수로 받은 클라이언트 소켓전달
-	int strLen = 0, i;
+	int strLen = 0, i=0,j=0;
+	char word[30],sameword[30];
 	Packet packet;
-	FILE *file_dictionary, *file_note;
-	file_dictionary = fopen("dictionary.txt", "rt");
-	file_note = fopen("note.txt", "wt");
-
-	while ((strLen = recv(clientSock,(char*)&packet, sizeof(packet), 0)) != -1) {
+	
+	while ((strLen = recv(clientSock,(char*)&packet.buffer, sizeof(packet), 0)) != -1) {
 		//recv함수:반환값이 받은 데이터 크기 , 실패하면 -1
+		//지금 받은 단어는 packet에 있음
 		if (packet.type == 1) {
 			// 단어가 일치하는 검사 -> 단어장에 있는지 <파일1>
 			// 단어 앞자리가 그 전에 왔던 뒷자리랑 같은지 <파일2>
@@ -126,14 +155,55 @@ unsigned WINAPI HandleClient(void* arg) {
 			//		0
 			// 중복되면?
 			//		1
+			//1.파일길이구하기
+			int isIn = 0;
+			for (int i = 0; i < dictionary_count; i++)
+			{
+				if (strcmp(dictionary_list[i], packet.buffer) == 0)
+				{
+					// 기존에 있었던거 ? -> 1
+					// 없던거 -> 단어반환
+					isIn = 1;
+					break;
+				}
+			}
+
+			if (isIn)
+			{
+				//word 검사해서 있으면 1
+				// 없으면 단어
+				isIn = 0;
+				for (int i = 0; i < word_count; i++) {
+					if (strcmp(word_list[i], packet.buffer) == 0) {
+						isIn = 1;
+						break;
+					}
+				}
+				if (isIn)
+				{
+					strcpy(packet.buffer, "1");
+				}
+				else
+				{
+					strcpy(word_list[word_count], packet.buffer);
+					word_count++;
+				}
+			}
+			else
+			{
+				strcpy(packet.buffer, "0");
+				// 0
+			}
+
+			// 위에서 단어장에 없는 단어면 -> 0
 
 		}
 		else if (packet.type == 2) {
-			SendMsg((char*)&packet, strLen);
+			SendMsg(&packet, strLen);
 		}
 		else {
 			strcpy(packet.buffer, "error");
-			SendMsg((char*)&packet, strLen);
+			SendMsg(&packet, strLen);
 		}
 	}
 	//이 줄을 실행한다는 것은 해당 클라이언트가 나갔다는 사실

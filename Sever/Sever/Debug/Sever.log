@@ -1,2 +1,4 @@
 ﻿  sever.cpp
+c:\users\user\desktop\layer7\팀프\sever\sever\sever\sever.cpp(143): warning C4101: 'sameword' :참조되지 않은 지역 변수입니다.
+c:\users\user\desktop\layer7\팀프\sever\sever\sever\sever.cpp(143): warning C4101: 'word' :참조되지 않은 지역 변수입니다.
   Sever.vcxproj -> C:\Users\User\Desktop\Layer7\팀프\sever\Sever\Debug\Sever.exe
