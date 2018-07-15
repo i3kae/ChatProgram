@@ -123,19 +123,44 @@ void Print_Word(LPVOID n)
 {
 	int k, Player_life = 3,strLen;
 
-	while ((strLen = recv(hSocket, (char*)&packet, sizeof(Packet), 0)) != -1)
+	while (recv(hSocket, (char*)&packet, sizeof(Packet), 0) != -1)
 	{
-		for (k = 19; k >= 0; k--)
-		{
-			if (k == 0) // 맨 아래 채팅창의 배열에 입력된 문자열을 대입
-				strcpy(Chatingchang[k], packet.buffer);
-			else // 아닐경우 채팅창 배열을 한칸씩 올림
-				strcpy(Chatingchang[k], Chatingchang[k - 1]);
+		if(Player_life==0)
+			break;
 
-			//현재 위치의 화면 초기화 및 이동, 맨위 부터 출력
-			Clear_line(1, 20 - k);
-			gotoxy(1, 20 - k);
-			printf("%s", Chatingchang[k]);
+		if (packet.type == 1)
+		{
+			if (!strcmp(packet.buffer, "1"))
+			{
+
+			}
+			else if (!strcmp(packet.buffer, "0"))
+			{
+
+			}
+			else if (!strcmp(packet.buffer, "error"))
+			{
+
+			}
+			else
+			{
+			}
+		}
+		else if (packet.type == 2)
+		{
+			for (k = 19; k >= 0; k--)
+			{
+				if (k == 0) // 맨 아래 채팅창의 배열에 입력된 문자열을 대입
+					strcpy(Chatingchang[k], packet.buffer);
+				else // 아닐경우 채팅창 배열을 한칸씩 올림
+					strcpy(Chatingchang[k], Chatingchang[k - 1]);
+
+				//현재 위치의 화면 초기화 및 이동, 맨위 부터 출력
+				Clear_line(1, 20 - k);
+				gotoxy(1, 20 - k);
+				printf("%s", Chatingchang[k]);
+			}
+			gotoxy(1, 23);
 		}
 	}
 
