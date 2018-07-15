@@ -121,11 +121,11 @@ void gotoxy(int x, int y)
 
 void Print_Word(LPVOID n)
 {
-	int k,strLen;
+	int k, strLen;
 
 	while (recv(hSocket, (char*)&packet, sizeof(Packet), 0) != -1)
 	{
-		if(Player_life==0)
+		if (Player_life == 0)
 			break;
 
 		if (packet.type == 1)
@@ -212,7 +212,7 @@ void Chating(LPVOID n)
 	{
 		Clear_line(1, 23);
 		gotoxy(1, 23);
-		scanf("%d%c", &flag,&dump);
+		scanf("%d%c", &flag, &dump);
 
 		switch (flag)
 		{
