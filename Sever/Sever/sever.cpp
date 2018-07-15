@@ -143,7 +143,7 @@ unsigned WINAPI HandleClient(void* arg) {
 	char word[30],sameword[30];
 	Packet packet;
 	
-	while ((strLen = recv(clientSock,(char*)&packet.buffer, sizeof(packet), 0)) != -1) {
+	while ((strLen = recv(clientSock,(char*)&packet, sizeof(packet), 0)) != -1) {
 		//recv함수:반환값이 받은 데이터 크기 , 실패하면 -1
 		//지금 받은 단어는 packet에 있음
 		if (packet.type == 1) {
@@ -196,6 +196,7 @@ unsigned WINAPI HandleClient(void* arg) {
 			}
 
 			// 위에서 단어장에 없는 단어면 -> 0
+			SendMsg(&packet, strLen);
 
 		}
 		else if (packet.type == 2) {
@@ -223,6 +224,6 @@ unsigned WINAPI HandleClient(void* arg) {
 void SendMsg(Packet* packet, int len) { //메세지를 모든 클라이언트에 보낸다
 	int i;
 	for (i = 0; i < clientCount; i++)
-		send(clientSocks[i],packet->buffer, len, 0);
+		send(clientSocks[i],(char*)packet, len, 0);
 
 }
