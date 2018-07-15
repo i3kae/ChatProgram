@@ -24,7 +24,7 @@ void Clear_line(x, y);
 void Print_Word(LPVOID n);
 void Chating(LPVOID n);
 
-int Chating_line = 0;
+int Chating_line = 0, Player_life = 3;
 char Chat[101];
 HANDLE hThrd_Word, hThrd_Chating;
 DWORD threadId_Word, threadId_Chating;
@@ -88,8 +88,8 @@ int main() {
 	}
 
 	//쓰레드를 생성
-	hThrd_Word = CreateThread(NULL, 0, (DWORD WINAPI)Print_Word, 0, 0, &threadId_Word);
 	hThrd_Chating = CreateThread(NULL, 0, (DWORD WINAPI)Chating, 0, 0, &threadId_Chating);
+	hThrd_Word = CreateThread(NULL, 0, (DWORD WINAPI)Print_Word, 0, 0, &threadId_Word);
 
 	//끝말잇기 함수가 끝나면 프로세스 종료
 	WaitForSingleObject(hThrd_Word, INFINITE);
@@ -109,7 +109,7 @@ void ErrorHandling(char* message) {
 void Clear_line(x, y)
 {
 	gotoxy(x, y);
-	printf("                                                            ");
+	printf("                                        ");
 }
 
 //커서 이동 함수
@@ -121,7 +121,7 @@ void gotoxy(int x, int y)
 
 void Print_Word(LPVOID n)
 {
-	int k, Player_life = 3,strLen;
+	int k,strLen;
 
 	while (recv(hSocket, (char*)&packet, sizeof(Packet), 0) != -1)
 	{
@@ -130,20 +130,44 @@ void Print_Word(LPVOID n)
 
 		if (packet.type == 1)
 		{
-			if (!strcmp(packet.buffer, "1"))
+			if (!strcmp(packet.buffer, "0"))
 			{
-
+				Clear_line(PRINT_WORD_CHAIN_X, 9);
+				gotoxy(PRINT_WORD_CHAIN_X, 9);
+				printf("단어가 없습니다");
+				Clear_line(1, 23);
+				gotoxy(1, 23);
 			}
-			else if (!strcmp(packet.buffer, "0"))
+			else if (!strcmp(packet.buffer, "1"))
 			{
-
+				Clear_line(PRINT_WORD_CHAIN_X, 9);
+				gotoxy(PRINT_WORD_CHAIN_X, 9);
+				printf("이미 사용된 단어입니다.");
+				Clear_line(1, 23);
+				gotoxy(1, 23);
+			}
+			else if (!strcmp(packet.buffer, "-1"))
+			{
+				Clear_line(PRINT_WORD_CHAIN_X, 9);
+				gotoxy(PRINT_WORD_CHAIN_X, 9);
+				printf("전 단어와 현 단어의 앞, 뒤가 다릅니다.");
+				Clear_line(1, 23);
+				gotoxy(1, 23);
 			}
 			else if (!strcmp(packet.buffer, "error"))
 			{
-
+				// 아무 처리를 안해주기위해 일부러 비워줬습니다.
 			}
 			else
 			{
+				Clear_line(PRINT_WORD_CHAIN_X, 9);
+				gotoxy(PRINT_WORD_CHAIN_X, 9);
+				printf("단어가 존재합니다.");
+				Clear_line(PRINT_WORD_CHAIN_X, 14);
+				gotoxy(PRINT_WORD_CHAIN_X, 14);
+				printf("전 단어 : %s", packet.buffer);
+				Clear_line(1, 23);
+				gotoxy(1, 23);
 			}
 		}
 		else if (packet.type == 2)
@@ -162,6 +186,17 @@ void Print_Word(LPVOID n)
 			}
 			gotoxy(1, 23);
 		}
+		else if (packet.type == 3)
+		{
+			if ((!strcmp(packet.buffer, "0")) || (!strcmp(packet.buffer, "1")) || (!strcmp(packet.buffer, "-1")))
+				Player_life--;
+		}
+
+		Clear_line(PRINT_WORD_CHAIN_X, 5);
+		gotoxy(PRINT_WORD_CHAIN_X, 5);
+		printf("Player Life : %d", Player_life);
+		Clear_line(1, 23);
+		gotoxy(1, 23);
 	}
 
 	SetEvent(hThrd_Word);
@@ -188,8 +223,9 @@ void Chating(LPVOID n)
 		Clear_line(1, 23);
 		gotoxy(1, 23);
 		printf("입력 : ");
-		gets_s(Player_input, 30);
-		
+
+		gets_s(packet.buffer, 30);
+
 		send(hSocket, (char*)&packet, sizeof(Packet), 0);
 	}
 }
