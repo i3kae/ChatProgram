@@ -1,7 +1,6 @@
-//¿ø¼Ó ÃÊ±âÈ­ -> ¼ÒÄÏ»ı¼º -> bind->listen->accept-> ¼ÒÄÏÇØÁ¦->¿ø¼ÓÁ¾·á
-
+//ì›ì† ì´ˆê¸°í™” -> ì†Œì¼“ìƒì„± -> bind->listen->accept-> ì†Œì¼“í•´ì œ->ì›ì†ì¢…ë£Œ
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
-#include <stdlib.h>
 #include <winsock2.h>
 #include <string.h>
 #include<Windows.h>
@@ -11,31 +10,36 @@
 
 #define BUF_SIZE 300
 
-unsigned WINAPI HandleClient(void* arg); //¾²·¹µå ÇÔ¼ö 
-										 //WINAPI : __stdcall
-										 //ÇÔ¼ö ¹İÈ¯°ªÀÇ ÀÚ·áÇü, ÇÔ¼öÈ£Ãâ±Ô¾à, ¸Å°³º¯¼öÀÇ ÀÚ·áÇü,°³¼ö -> ÇÔ¼öÀÇ ¿øÇü
-void SendMsg(char* msg, int len);//¸Ş¼¼Áö º¸³»´Â ÇÔ¼ö
-int Word_Check(char *input, char *prev_word);
+char dictionary_list[1000000][30];
+int dictionary_count = 0;
+char word_list[1000000][30];
+int word_count = 0;
 
-int clientCount = 0;
-SOCKET clientSocks[30]; //Å¬¶óÀÌ¾ğÆ® ¼ÒÄÏ º¸°ü¿ë ¹è¿­
+void ReadWordList();
 
 typedef struct _packet {
-	int type; // 1ÀÌ¸é ´Ü¾îÀÔ·Â, 2ÀÌ¸é Ã¤ÆÃ
-	char buffer[101];
-	char re[20];
-	char name[21];
+	int type; // 1ì´ë©´ ë‹¨ì–´ì…ë ¥, 2ì´ë©´ ì±„íŒ…
+	char buffer[100];
 }Packet;
 
+unsigned WINAPI HandleClient(void* arg); //ì“°ë ˆë“œ í•¨ìˆ˜ 
+										 //WINAPI : __stdcall
+										 //í•¨ìˆ˜ ë°˜í™˜ê°’ì˜ ìë£Œí˜•, í•¨ìˆ˜í˜¸ì¶œê·œì•½, ë§¤ê°œë³€ìˆ˜ì˜ ìë£Œí˜•,ê°œìˆ˜ -> í•¨ìˆ˜ì˜ ì›í˜•
+void SendMsg(Packet* packet, int len);//ë©”ì„¸ì§€ ë³´ë‚´ëŠ” í•¨ìˆ˜
+
+int clientCount = 0;
+SOCKET clientSocks[30]; //í´ë¼ì´ì–¸íŠ¸ ì†Œì¼“ ë³´ê´€ìš© ë°°ì—´
+
+
 int main(int argc, char* argv[]) {
-	//1. ¼ÒÄÏÇÁ·Î±×·¡¹ÖÀÇ ÇÔ¼ö¸¦ »ç¿ëÇÏ·Á¸é ±¸Á¶Ã¼ ¼±¾ğ(SOCKET)
-	//2. ÃÊ±âÈ­ ÇÔ¼ö¸¦ »ç¿ëÇÏ¿© ¼ÒÄÏÇÁ·Î±×·¡¹Ö ÃÊ±âÈ­(WSADATA wsa;)
-	//3. ¼ÒÄÏÀ» »ı¼ºÇÏ±â À§ÇØ¼± SOCKET sock; ±¸Á¶Ã¼¸¦ ¼±¾ğ
-	//4. ¼ÒÄÏ ÁÖ¼Ò ±¸Á¶Ã¼¸¦ È°¿ëÇÏ¿© ÁÖ¼Ò Ã¼°è È®¸³(struct sockaddr_in sockinfo, bind)
-	//5. µ¥ÀÌÅÍ Åë½Å(listen,accept)
-	//5-1. listen : ¼­¹ö ³Ì³õ°í ÀÖÁö¸»°í Å¬¶óÀÌ¾ğÆ® ÇÏ´Â¸» µè°Ô ´ë±â»óÅÂ·Î ÀÖ¾î
-	//5-2. accept : listenÀÇ ¿äÃ»À» °¡Á®¿Í¼­ ¼­¹ö ÇÁ·Î±×·¥ ¾È¿¡ Å¬¶óÀÌ¾ğÆ® ¿¬°á ¼ÒÄÏ ¸¸µé±â
-	//6. send ÇÔ¼ö¸¦ ÀÌ¿ëÇØ ¹®ÀÚ ÇÏ³ª¸¦ Àü¼ÛÇÏ°í Á¾·á(send,closesocket)
+	//1. ì†Œì¼“í”„ë¡œê·¸ë˜ë°ì˜ í•¨ìˆ˜ë¥¼ ì‚¬ìš©í•˜ë ¤ë©´ êµ¬ì¡°ì²´ ì„ ì–¸(SOCKET)
+	//2. ì´ˆê¸°í™” í•¨ìˆ˜ë¥¼ ì‚¬ìš©í•˜ì—¬ ì†Œì¼“í”„ë¡œê·¸ë˜ë° ì´ˆê¸°í™”(WSADATA wsa;)
+	//3. ì†Œì¼“ì„ ìƒì„±í•˜ê¸° ìœ„í•´ì„  SOCKET sock; êµ¬ì¡°ì²´ë¥¼ ì„ ì–¸
+	//4. ì†Œì¼“ ì£¼ì†Œ êµ¬ì¡°ì²´ë¥¼ í™œìš©í•˜ì—¬ ì£¼ì†Œ ì²´ê³„ í™•ë¦½(struct sockaddr_in sockinfo, bind)
+	//5. ë°ì´í„° í†µì‹ (listen,accept)
+	//5-1. listen : ì„œë²„ ë„‹ë†“ê³  ìˆì§€ë§ê³  í´ë¼ì´ì–¸íŠ¸ í•˜ëŠ”ë§ ë“£ê²Œ ëŒ€ê¸°ìƒíƒœë¡œ ìˆì–´
+	//5-2. accept : listenì˜ ìš”ì²­ì„ ê°€ì ¸ì™€ì„œ ì„œë²„ í”„ë¡œê·¸ë¨ ì•ˆì— í´ë¼ì´ì–¸íŠ¸ ì—°ê²° ì†Œì¼“ ë§Œë“¤ê¸°
+	//6. send í•¨ìˆ˜ë¥¼ ì´ìš©í•´ ë¬¸ì í•˜ë‚˜ë¥¼ ì „ì†¡í•˜ê³  ì¢…ë£Œ(send,closesocket)
 
 	SOCKET sock, clientsock;
 	WSADATA wsa;
@@ -44,69 +48,68 @@ int main(int argc, char* argv[]) {
 	char message[] = "sucess";
 	HANDLE hThread;
 
-	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) //ÃÊ±âÈ­
+	ReadWordList();
+
+	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) //ì´ˆê¸°í™”
 	{
-		printf("ÃÊ±âÈ­ ½ÇÆĞ\n");
+		printf("ì´ˆê¸°í™” ì‹¤íŒ¨\n");
 		return 0;
 	}
 
 	sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	//sock=socket(af,type,protocol);
-	//af=ÁÖ¼ÒÃ¼°è , type=¼ÒÄÏÅ¸ÀÔ , protocol=ÇÁ·ÎÅäÄİ
-	//ÀÎÅÍ³İ ¿µ¿ªÀ» »ç¿ëÇÏ´Â TCP¹æ½ÄÀÇ ÇÁ·ÎÅäÄİ
+	//af=ì£¼ì†Œì²´ê³„ , type=ì†Œì¼“íƒ€ì… , protocol=í”„ë¡œí† ì½œ
+	//ì¸í„°ë„· ì˜ì—­ì„ ì‚¬ìš©í•˜ëŠ” TCPë°©ì‹ì˜ í”„ë¡œí† ì½œ
 	if (sock == INVALID_SOCKET)
 	{
-		printf("¼ÒÄÏ »ı¼º ½ÇÆĞ\n");
+		printf("ì†Œì¼“ ìƒì„± ì‹¤íŒ¨\n");
 		return 0;
 	}
 
 	memset(&sockinfo, 0x00, sizeof(sockinfo));
-	sockinfo.sin_family = AF_INET; //sockinfo ±¸Á¶Ã¼ÀÇ sin_family¿¡ ÀÎÅÍ³İ ÁÖ¼Ò »ç¿ë
-	sockinfo.sin_port = htons(5959); //Æ÷Æ® ÁöÁ¤
-	sockinfo.sin_addr.s_addr = htonl(INADDR_ANY); //0.0.0.0ÁÖ¼Ò¸¦ »ç¿ëÇÏ¿© 
-												  //¸ğµç »ç¿ë°¡´ÉÇÑ ÁÖ¼Ò·ÎºÎÅÍ ´ë±â
+	sockinfo.sin_family = AF_INET; //sockinfo êµ¬ì¡°ì²´ì˜ sin_familyì— ì¸í„°ë„· ì£¼ì†Œ ì‚¬ìš©
+	sockinfo.sin_port = htons(5959); //í¬íŠ¸ ì§€ì •
+	sockinfo.sin_addr.s_addr = htonl(INADDR_ANY); //0.0.0.0ì£¼ì†Œë¥¼ ì‚¬ìš©í•˜ì—¬ 
+												  //ëª¨ë“  ì‚¬ìš©ê°€ëŠ¥í•œ ì£¼ì†Œë¡œë¶€í„° ëŒ€ê¸°
 
 	if (bind(sock, (SOCKADDR*)&sockinfo, sizeof(sockinfo)) == SOCKET_ERROR)
 	{
-		//int bind (¼ÒÄÏ °ª,(SOCKADDR*)&¼ÒÄÏÁÖ¼Ò±¸Á¶Ã¼ ÀúÀå°ª,sizeof(¼ÒÄÏ±¸Á¶Ã¼ ÀúÀå°ª))
-		//bind ÁÖ¼Ò¸¦ »ç¿ëÇÏ¿© ¼ÒÄÏ ±¸Á¶Ã¼ÀÇ Á¤º¸¸¦ ÁøÁ¤ÇÑ ¼ÒÄÏ¿¡ Àü´Ş
-		printf("bind ½ÇÆĞ");
+		//int bind (ì†Œì¼“ ê°’,(SOCKADDR*)&ì†Œì¼“ì£¼ì†Œêµ¬ì¡°ì²´ ì €ì¥ê°’,sizeof(ì†Œì¼“êµ¬ì¡°ì²´ ì €ì¥ê°’))
+		//bind ì£¼ì†Œë¥¼ ì‚¬ìš©í•˜ì—¬ ì†Œì¼“ êµ¬ì¡°ì²´ì˜ ì •ë³´ë¥¼ ì§„ì •í•œ ì†Œì¼“ì— ì „ë‹¬
+		printf("bind ì‹¤íŒ¨");
 		return 0;
 	}
 
 
 	if (listen(sock, 5) == SOCKET_ERROR)
 	{
-		printf("´ë±â¿­ ½ÇÆĞ\n");
+		printf("ëŒ€ê¸°ì—´ ì‹¤íŒ¨\n");
 		return 0;
 	}
 	//int listen(SOCKET,backlog)
-	//SOCKET :¼ÒÄÏ »ı¼º½Ã ¸¸µé¾î¼­ ÀúÀåÇß´ø ¼ÒÄÏ ÇÚµé °ª
-	//BAcklog : Åë·Î°ª
+	//SOCKET :ì†Œì¼“ ìƒì„±ì‹œ ë§Œë“¤ì–´ì„œ ì €ì¥í–ˆë˜ ì†Œì¼“ í•¸ë“¤ ê°’
+	//BAcklog : í†µë¡œê°’
 
-	// only ¼­¹ö
 	clientsize = sizeof(clientinfo);
-	printf("Å¬¶óÀÌ¾ğÆ®·ÎºÎÅÍ Á¢¼ÓÀ» ±â´Ù¸®°í ÀÖ½À´Ï´Ù...\n");
+	printf("í´ë¼ì´ì–¸íŠ¸ë¡œë¶€í„° ì ‘ì†ì„ ê¸°ë‹¤ë¦¬ê³  ìˆìŠµë‹ˆë‹¤...\n");
 
-	for (i = 0; i<4; i++)
+	while (1)
 	{
 		clientsock = accept(sock, (SOCKADDR*)&clientinfo, &clientsize);
-		//accept(¼­¹ö ¼ÒÄÏ,((SOCKADDR*)&Å¬¶óÀÌ¾ğÆ®ÁÖ¼Ò°ª,&Å¬¶óÀÌ¾ğÆ® ÁÖ¼Ò°ª »çÀÌÁî))
-		//Å¬¶óÀÌ¾ğÆ®¿Í ¿¬°á µÉ ¼ÒÄÏÀ» ¸¸µé¾î ÁÖ¾î¾ß ÇÏ¹Ç·Î clientsockº¯¼ö ¼±¾ğ
+		//accept(ì„œë²„ ì†Œì¼“,((SOCKADDR*)&í´ë¼ì´ì–¸íŠ¸ì£¼ì†Œê°’,&í´ë¼ì´ì–¸íŠ¸ ì£¼ì†Œê°’ ì‚¬ì´ì¦ˆ))
+		//í´ë¼ì´ì–¸íŠ¸ì™€ ì—°ê²° ë  ì†Œì¼“ì„ ë§Œë“¤ì–´ ì£¼ì–´ì•¼ í•˜ë¯€ë¡œ clientsockë³€ìˆ˜ ì„ ì–¸
 
 		if (clientsock == INVALID_SOCKET)
 		{
-			printf("Å¬¶óÀÌ¾ğÆ® ¼ÒÄÏ ¿¬°á ½ÇÆĞ");
+			printf("í´ë¼ì´ì–¸íŠ¸ ì†Œì¼“ ì—°ê²° ì‹¤íŒ¨");
 			return 0;
 		}
 		clientSocks[clientCount++] = sock;
-		//Å¬¶óÀÌ¾ğÆ® ¼ÒÄÏ¹è¿­¿¡¹æ±İ °¡Á®¿Â ¼ÒÄÏ ÁÖ¼Ò¸¦ Àü´Ş
-		_beginthreadex_proc_type
+		//í´ë¼ì´ì–¸íŠ¸ ì†Œì¼“ë°°ì—´ì—ë°©ê¸ˆ ê°€ì ¸ì˜¨ ì†Œì¼“ ì£¼ì†Œë¥¼ ì „ë‹¬
 
-			hThread = (HANDLE)_beginthreadex(NULL, 0, HandleClient, (void*)&sock, 0, NULL);
-		//HandleClient ¾²·¹µå ½ÇÇà
+		hThread = (HANDLE)_beginthreadex(NULL, 0, HandleClient, (void*)&clientsock, 0, NULL);
+		//HandleClient ì“°ë ˆë“œ ì‹¤í–‰
 	}
-
 	closesocket(clientsock);
 	closesocket(sock);
 	WSACleanup();
@@ -114,97 +117,115 @@ int main(int argc, char* argv[]) {
 }
 
 
-unsigned WINAPI HandleClient(void* arg) {
-	SOCKET clientSock = *((SOCKET*)arg); //¸Å°³º¯¼ö·Î ¹ŞÀº Å¬¶óÀÌ¾ğÆ® ¼ÒÄÏÀü´Ş
-	int strLen = 0, i;
-	char name[21];
-	Packet packet;
-	FILE *file_dictionary, *file_note;
+void ReadWordList()
+{
+	FILE *file_dictionary;
+	char buffer[30];
 	file_dictionary = fopen("dictionary.txt", "rt");
-	file_note = fopen("note.txt", "wt");
+	if (file_dictionary == NULL)
+	{
+		printf("File error");
+	}
+	//////////
+	//fscanfì˜ ë°˜í™˜ê°’ì€ ì„±ê³µì ìœ¼ë¡œ ì½íŒ ë³€ìˆ˜ì˜ ê°œìˆ˜
+	//êµ‰ì¥íˆ ë§ì´ ì“°ì´ëŠ” íŠ¸ë¦­ì„!
+	while (fscanf(file_dictionary, "%s", buffer) == 1) {
+		strcpy(word_list[word_count++], buffer);
+	}
+	//file_dictionaryì—ì„œ ì½ì–´ì˜¤ëŠ” ì¦‰ì‹œ word_listì— ë³µì‚¬
+	//////////
+	fclose(file_dictionary);
+}
 
-	if ((strlen = recv(clientSocks, (char*)&packet, sizeof(packet), 0)) != -1)
-		strcpy(name, packet.buffer);
+unsigned WINAPI HandleClient(void* arg) {
+	SOCKET clientSock = *((SOCKET*)arg); //ë§¤ê°œë³€ìˆ˜ë¡œ ë°›ì€ í´ë¼ì´ì–¸íŠ¸ ì†Œì¼“ì „ë‹¬
+	int strLen = 0, i = 0, j = 0;
+	char word[30], sameword[30];
+	Packet packet;
 
-	while ((strLen = recv(clientSock, (char*)&packet, sizeof(packet), 0)) != -1) {
-
-		//recvÇÔ¼ö:¹İÈ¯°ªÀÌ ¹ŞÀº µ¥ÀÌÅÍ Å©±â , ½ÇÆĞÇÏ¸é -1
+	while (recv(clientSock, (char*)&packet, sizeof(Packet), 0) != -1) {
+		//recví•¨ìˆ˜:ë°˜í™˜ê°’ì´ ë°›ì€ ë°ì´í„° í¬ê¸° , ì‹¤íŒ¨í•˜ë©´ -1
+		//ì§€ê¸ˆ ë°›ì€ ë‹¨ì–´ëŠ” packetì— ìˆìŒ
 		if (packet.type == 1) {
-			Word_Check(char *input, char *prev_word);
-			// ´Ü¾î°¡ ÀÏÄ¡ÇÏ´Â °Ë»ç -> ´Ü¾îÀå¿¡ ÀÖ´ÂÁö <ÆÄÀÏ1>
-			// ´Ü¾î ¾ÕÀÚ¸®°¡ ±× Àü¿¡ ¿Ô´ø µŞÀÚ¸®¶û °°ÀºÁö <ÆÄÀÏ2>
-			// °°À¸¸é?
-			//      ±× ´Ü¾î¸¦ ¹İÈ¯
-			// ´Ù¸£¸é?
-			//      0
-			// Áßº¹µÇ¸é?
-			//      1
+			// ë‹¨ì–´ê°€ ì¼ì¹˜í•˜ëŠ” ê²€ì‚¬ -> ë‹¨ì–´ì¥ì— ìˆëŠ”ì§€ <íŒŒì¼1>
+			// ë‹¨ì–´ ì•ìë¦¬ê°€ ê·¸ ì „ì— ì™”ë˜ ë’·ìë¦¬ë‘ ê°™ì€ì§€ <íŒŒì¼2>
+			// ê°™ìœ¼ë©´?
+			//		ê·¸ ë‹¨ì–´ë¥¼ ë°˜í™˜
+			// ë‹¤ë¥´ë©´?
+			//		0
+			// ì¤‘ë³µë˜ë©´?
+			//		1
+			//1.íŒŒì¼ê¸¸ì´êµ¬í•˜ê¸°
+			int isIn = 0;
+			for (int i = 0; i < dictionary_count; i++)
+			{
+				if (strcmp(dictionary_list[i], packet.buffer) == 0)
+				{
+					// ê¸°ì¡´ì— ìˆì—ˆë˜ê±° ? -> 1
+					// ì—†ë˜ê±° -> ë‹¨ì–´ë°˜í™˜
+					isIn = 1;
+					break;
+				}
+			}
+
+			if (isIn)
+			{
+				//word ê²€ì‚¬í•´ì„œ ìˆìœ¼ë©´ 1
+				// ì—†ìœ¼ë©´ ë‹¨ì–´
+				isIn = 0;
+				for (int i = 0; i < word_count; i++) {
+					if (strcmp(word_list[i], packet.buffer) == 0) {
+						isIn = 1;
+						break;
+					}
+				}
+				if (isIn)
+				{
+					strcpy(packet.buffer, "1");
+				}
+				else
+				{
+					strcpy(word_list[word_count], packet.buffer);
+					word_count++;
+				}
+			}
+			else
+			{
+				strcpy(packet.buffer, "0");
+				// 0
+			}
+
+			// ìœ„ì—ì„œ ë‹¨ì–´ì¥ì— ì—†ëŠ” ë‹¨ì–´ë©´ -> 0
+			SendMsg(&packet, strLen);
+
+			packet.type = 0;
+
 		}
 		else if (packet.type == 2) {
-			SendMsg((char*)&packet, strLen);
+			SendMsg(&packet, strLen);
 		}
 		else {
 			strcpy(packet.buffer, "error");
-			SendMsg((char*)&packet, strLen);
+			SendMsg(&packet, strLen);
 		}
 	}
-	//ÀÌ ÁÙÀ» ½ÇÇàÇÑ´Ù´Â °ÍÀº ÇØ´ç Å¬¶óÀÌ¾ğÆ®°¡ ³ª°¬´Ù´Â »ç½Ç
-	//µû¶ó¼­ ÇØ´ç Å¬¶óÀÌ¾ğÆ®¸¦ ¹è¿­¿¡¼­ »©Áà¾ßÇÑ´Ù
-	for (i = 0; i < clientCount; i++) { //¹è¿­ÀÇ °¹¼ö¸¸Å­
-		if (clientSock == clientSocks[i]) { //¸¸¾à ÇöÀç clientSocks°ªÀÌ ¹è¿­ÀÇ °ª°ú °°´Ù¸é
-			while (i++ < clientCount - 1)//Å¬¶óÀÌ¾ğÆ® °³¼ö¸¸Å­
-				clientSocks[i] = clientSocks[i + 1]; //¾ÕÀ¸·Î ¶¯±ä´Ù
+	//ì´ ì¤„ì„ ì‹¤í–‰í•œë‹¤ëŠ” ê²ƒì€ í•´ë‹¹ í´ë¼ì´ì–¸íŠ¸ê°€ ë‚˜ê°”ë‹¤ëŠ” ì‚¬ì‹¤
+	//ë”°ë¼ì„œ í•´ë‹¹ í´ë¼ì´ì–¸íŠ¸ë¥¼ ë°°ì—´ì—ì„œ ë¹¼ì¤˜ì•¼í•œë‹¤
+	for (i = 0; i < clientCount; i++) { //ë°°ì—´ì˜ ê°¯ìˆ˜ë§Œí¼
+		if (clientSock == clientSocks[i]) { //ë§Œì•½ í˜„ì¬ clientSocksê°’ì´ ë°°ì—´ì˜ ê°’ê³¼ ê°™ë‹¤ë©´
+			while (i++ < clientCount - 1)//í´ë¼ì´ì–¸íŠ¸ ê°œìˆ˜ë§Œí¼
+				clientSocks[i] = clientSocks[i + 1]; //ì•ìœ¼ë¡œ ë•¡ê¸´ë‹¤
 			break;
 		}
 	}
 	clientCount--;
-	closesocket(clientSock);//¼ÒÄÏÀ» Á¾·áÇÑ´Ù
+	closesocket(clientSock);//ì†Œì¼“ì„ ì¢…ë£Œí•œë‹¤
 	return 0;
 }
 
-void SendMsg(Packet* packet, int len) { //¸Ş¼¼Áö¸¦ ¸ğµç Å¬¶óÀÌ¾ğÆ®¿¡ º¸³½´Ù
+void SendMsg(Packet* packet, int len) { //ë©”ì„¸ì§€ë¥¼ ëª¨ë“  í´ë¼ì´ì–¸íŠ¸ì— ë³´ë‚¸ë‹¤
 	int i;
 	for (i = 0; i < clientCount; i++)
-		send(clientSocks[i], (char*)&packet, sizeof(Packet), 0);
-}
+		send(clientSocks[i], (char*)packet, sizeof(Packet), 0);
 
-int Word_Check(char *input, char *prev_word)
-{
-	int i = 0, flag = 0;
-	char file_load[100];
-	char Player_input[32];
-	FILE *file_pointer;
-	file_pointer = fopen("Word.txt", "rt");
-
-	//»çÀü ÆÄÀÏÀÌ ¾øÀ»°æ¿ì
-	if (file_pointer == NULL)
-	{
-		Clear_line(PRINT_WORD_CHAIN_X, 9);
-		gotoxy(PRINT_WORD_CHAIN_X, 9);
-		printf("»çÀü ÆÄÀÏÀÌ ¾ø½À´Ï´Ù. WordÆÄÀÏÀ» ¼³Á¤ÈÄ ÀÌ¿ëÇØ ÁÖ¼¼¿ä.");
-		return -1;
-	}
-
-	//ÀÔ·ÂµÈ ¹®ÀÚ¿­¿¡¼­ !¸¦ Á¦°Å
-	for (i = 1; i < 32; i++)
-		Player_input[i - 1] = input[i];
-
-	//»çÀüÀ» °Ë»ö Áß ´Ü¾î°¡ ÀÖÀ¸¸é 0À» ¸®ÅÏ
-	while (!feof(file_pointer))
-	{
-		fgets(file_load, 99, file_pointer); //ÆÄÀÏ¿¡¼­ ÇÑÁÙ¾¿ ÀÔ·Â
-		if (!strcmp(file_load, Player_input)) //ÆÄÀÏ¿¡ÀÖ´Â ¹®ÀÚ¿­Áß ÇÏ³ª¶ó°í Player_input°ú °°Àº °ÍÀÌ ÀÖÀ¸¸é
-		{
-			Clear_line(PRINT_WORD_CHAIN_X, 9);
-			gotoxy(PRINT_WORD_CHAIN_X, 9);
-			printf("´Ü¾î°¡ Á¸ÀçÇÕ´Ï´Ù.");
-			return 0;
-		}
-	}
-
-	//¾øÀ¸¸é 1À» ¸®ÅÏ
-	Clear_line(PRINT_WORD_CHAIN_X, 9);
-	gotoxy(PRINT_WORD_CHAIN_X, 9);
-	printf("´Ü¾î°¡ ¾ø½À´Ï´Ù");
-	return 1;
 }
