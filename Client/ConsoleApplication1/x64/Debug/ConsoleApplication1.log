@@ -1,0 +1,23 @@
+﻿  ConsoleApplication1.c
+c:\users\iekae\downloads\everybody--master (1)\everybody--master\client\consoleapplication1\consoleapplication1.c(86): warning C4229: 오래된 구문을 사용했습니다. 데이터의 한정자가 무시됩니다.
+c:\users\iekae\downloads\everybody--master (1)\everybody--master\client\consoleapplication1\consoleapplication1.c(86): warning C4311: '형식 캐스트': 'void (__cdecl *)(LPVOID)'에서 'DWORD'(으)로 포인터가 잘립니다.
+c:\users\iekae\downloads\everybody--master (1)\everybody--master\client\consoleapplication1\consoleapplication1.c(86): warning C4047: '함수': 'LPTHREAD_START_ROUTINE'의 간접 참조 수준이 'DWORD'과(와) 다릅니다.
+c:\users\iekae\downloads\everybody--master (1)\everybody--master\client\consoleapplication1\consoleapplication1.c(86): warning C4024: 'CreateThread': 형식 및 실제 매개 변수 3의 형식이 서로 다릅니다.
+c:\users\iekae\downloads\everybody--master (1)\everybody--master\client\consoleapplication1\consoleapplication1.c(87): warning C4229: 오래된 구문을 사용했습니다. 데이터의 한정자가 무시됩니다.
+c:\users\iekae\downloads\everybody--master (1)\everybody--master\client\consoleapplication1\consoleapplication1.c(87): warning C4311: '형식 캐스트': 'void (__cdecl *)(LPVOID)'에서 'DWORD'(으)로 포인터가 잘립니다.
+c:\users\iekae\downloads\everybody--master (1)\everybody--master\client\consoleapplication1\consoleapplication1.c(87): warning C4047: '함수': 'LPTHREAD_START_ROUTINE'의 간접 참조 수준이 'DWORD'과(와) 다릅니다.
+c:\users\iekae\downloads\everybody--master (1)\everybody--master\client\consoleapplication1\consoleapplication1.c(87): warning C4024: 'CreateThread': 형식 및 실제 매개 변수 3의 형식이 서로 다릅니다.
+c:\users\iekae\downloads\everybody--master (1)\everybody--master\client\consoleapplication1\consoleapplication1.c(78): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\um\winsock2.h(1830): note: 'inet_addr' 선언을 참조하십시오.
+c:\users\iekae\downloads\everybody--master (1)\everybody--master\client\consoleapplication1\consoleapplication1.c(62): warning C4101: 'strLen' :참조되지 않은 지역 변수입니다.
+c:\users\iekae\downloads\everybody--master (1)\everybody--master\client\consoleapplication1\consoleapplication1.c(99): warning C4047: '함수': 'int'의 간접 참조 수준이 'char [2]'과(와) 다릅니다.
+c:\users\iekae\downloads\everybody--master (1)\everybody--master\client\consoleapplication1\consoleapplication1.c(99): warning C4024: 'fputc': 형식 및 실제 매개 변수 1의 형식이 서로 다릅니다.
+c:\users\iekae\downloads\everybody--master (1)\everybody--master\client\consoleapplication1\consoleapplication1.c(173): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\string.h(133): note: 'strcpy' 선언을 참조하십시오.
+c:\users\iekae\downloads\everybody--master (1)\everybody--master\client\consoleapplication1\consoleapplication1.c(175): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\string.h(133): note: 'strcpy' 선언을 참조하십시오.
+c:\users\iekae\downloads\everybody--master (1)\everybody--master\client\consoleapplication1\consoleapplication1.c(119): warning C4101: 'strLen' :참조되지 않은 지역 변수입니다.
+c:\users\iekae\downloads\everybody--master (1)\everybody--master\client\consoleapplication1\consoleapplication1.c(210): warning C4996: 'scanf': This function or variable may be unsafe. Consider using scanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\stdio.h(1274): note: 'scanf' 선언을 참조하십시오.
+c:\users\iekae\downloads\everybody--master (1)\everybody--master\client\consoleapplication1\consoleapplication1.c(203): warning C4101: 'Player_input' :참조되지 않은 지역 변수입니다.
+  ConsoleApplication1.vcxproj -> C:\Users\IEKAE\Downloads\Everybody--master (1)\Everybody--master\Client\x64\Debug\ConsoleApplication1.exe
