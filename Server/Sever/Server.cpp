@@ -26,7 +26,7 @@ Server::~Server() {
 }
 
 void Server::WSAInit() {
-	if (WSAStartup(MAKEWORD(2, 2), &(wsa)) != 0) //초기화
+	if (WSAStartup(MAKEWORD(2, 2), &(wsa)) != 0) // was 초기화
 	{
 		cout << "초기화 실패\n";
 		return;
@@ -83,6 +83,7 @@ void Server::messageQueuing() {
 	thread t([this]() -> void {
 		while (true) {
 			if (!messageQueue.empty()) {
+				// 필요할 때 추가로 사용
 				// SOCKET clientSock = messageQueue.front().first;
 				Packet* packet = messageQueue.front().second;
 				messageQueue.pop();
@@ -93,6 +94,7 @@ void Server::messageQueuing() {
 	t.detach();
 }
 
+// 현재 clientSession에 연결되어 있는 모든 Client에 패킷 전송
 void Server::broadcastPacket(Packet *packet) {
 	for (ClientSession client : clientSession)
 		client.SendMsg(packet);
