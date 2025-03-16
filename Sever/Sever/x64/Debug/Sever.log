@@ -1,4 +1,0 @@
-﻿  Sever.c
-c:\users\iekae\downloads\everybody--master (1)\everybody--master\sever\sever\sever.c(143): warning C4101: 'sameword' :참조되지 않은 지역 변수입니다.
-c:\users\iekae\downloads\everybody--master (1)\everybody--master\sever\sever\sever.c(143): warning C4101: 'word' :참조되지 않은 지역 변수입니다.
-  Sever.vcxproj -> C:\Users\IEKAE\Downloads\Everybody--master (1)\Everybody--master\Sever\x64\Debug\Sever.exe

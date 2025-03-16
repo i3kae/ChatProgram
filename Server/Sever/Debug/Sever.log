@@ -1,0 +1,7 @@
+﻿  Sever.c
+c:\users\iekae\desktop\sever\sever\sever.c(144): warning C4101: 'sameword' :참조되지 않은 지역 변수입니다.
+c:\users\iekae\desktop\sever\sever\sever.c(144): warning C4101: 'word' :참조되지 않은 지역 변수입니다.
+c:\users\iekae\desktop\sever\sever\sever.c(260): warning C4098: 'Word_Check': 'void' 함수에서 값을 반환하고 있습니다.
+c:\users\iekae\desktop\sever\sever\sever.c(269): warning C4098: 'Word_Check': 'void' 함수에서 값을 반환하고 있습니다.
+c:\users\iekae\desktop\sever\sever\sever.c(274): warning C4098: 'Word_Check': 'void' 함수에서 값을 반환하고 있습니다.
+  Sever.vcxproj -> C:\Users\IEKAE\Desktop\Sever\Debug\Sever.exe

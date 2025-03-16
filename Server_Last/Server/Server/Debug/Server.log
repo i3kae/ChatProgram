@@ -1,4 +1,0 @@
-﻿  Server.cpp
-c:\users\iekae\desktop\server\server\server\server.cpp(143): warning C4101: 'sameword' :참조되지 않은 지역 변수입니다.
-c:\users\iekae\desktop\server\server\server\server.cpp(143): warning C4101: 'word' :참조되지 않은 지역 변수입니다.
-  Server.vcxproj -> C:\Users\IEKAE\Desktop\Server\Server\Debug\Server.exe
