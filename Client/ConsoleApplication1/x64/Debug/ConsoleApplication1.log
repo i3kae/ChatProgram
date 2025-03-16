@@ -1,8 +1,0 @@
-﻿  ConsoleApplication1.cpp
-C:\Users\i3kae\Desktop\Code\Game\ChatProgram\Client\ConsoleApplication1\ConsoleApplication1.cpp(60,29): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
-C:\Users\i3kae\Desktop\Code\Game\ChatProgram\Client\ConsoleApplication1\ConsoleApplication1.cpp(44,6): warning C4101: 'strLen' :참조되지 않은 지역 변수입니다.
-C:\Users\i3kae\Desktop\Code\Game\ChatProgram\Client\ConsoleApplication1\ConsoleApplication1.cpp(95,18): warning C4838: 'int'에서 'SHORT'(으)로의 변환에는 축소 변환이 필요합니다.
-C:\Users\i3kae\Desktop\Code\Game\ChatProgram\Client\ConsoleApplication1\ConsoleApplication1.cpp(95,25): warning C4838: 'int'에서 'SHORT'(으)로의 변환에는 축소 변환이 필요합니다.
-C:\Users\i3kae\Desktop\Code\Game\ChatProgram\Client\ConsoleApplication1\ConsoleApplication1.cpp(145,12): warning C4477: 'printf' : 서식 문자열 '%s'에 'char *' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 'std::string'입니다.
-C:\Users\i3kae\Desktop\Code\Game\ChatProgram\Client\ConsoleApplication1\ConsoleApplication1.cpp(101,9): warning C4101: 'strLen' :참조되지 않은 지역 변수입니다.
-  ConsoleApplication1.vcxproj -> C:\Users\i3kae\Desktop\Code\Game\ChatProgram\Client\x64\Debug\ConsoleApplication1.exe
