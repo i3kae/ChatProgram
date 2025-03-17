@@ -4,18 +4,15 @@
 #include <process.h>
 #include <thread>
 #include <mutex>
-#include "Server.h"
-#include "Constant.h"
-#include "ClientSession.h"
+#include "server.h"
+#include "constant.h"
+#include "clientSession.h"
 
 using namespace std;
 
 // IP를 지정해주지 않을 경우 모든 IP(0.0.0.0)에서 허용
-Server::Server(u_short port, vector<string> wordList, u_long ip) {
-	this->ip = ip;
-	this->port = port;
-	this->wordList = wordList;
-	this->wordCount = wordList.size();
+Server::Server(u_short port, vector<string> wordList, u_long ip)
+: ip(ip), port(port), wordList(wordList), wordCount(wordList.size()) {
 	this->WSAInit();
 	this->serverSock = this->socketInit(port, ip);
 }
@@ -106,7 +103,7 @@ void Server::listenClient() {
 	SOCKET clientSock;
 	SOCKADDR_IN clientinfo;
 	int clientSize = sizeof(clientinfo);
-	mutex mqMutex;
+	recursive_mutex mqMutex;
 
 	while (1)
 	{

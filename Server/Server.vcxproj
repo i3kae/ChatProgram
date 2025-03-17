@@ -19,17 +19,17 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ClientSession.cpp" />
+    <ClCompile Include="clientSession.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Server.cpp" />
-    <ClCompile Include="Utils.cpp" />
+    <ClCompile Include="server.cpp" />
+    <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ClientSession.h" />
-    <ClInclude Include="Constant.h" />
-    <ClInclude Include="Server.h" />
-    <ClInclude Include="Type.h" />
-    <ClInclude Include="Utils.h" />
+    <ClInclude Include="clientSession.h" />
+    <ClInclude Include="constant.h" />
+    <ClInclude Include="server.h" />
+    <ClInclude Include="type.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

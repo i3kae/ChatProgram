@@ -2,7 +2,7 @@
 #include <winsock2.h>
 #include <mutex>
 #include <queue>
-#include "Type.h"
+#include "type.h"
 
 using namespace std;
 
@@ -12,10 +12,10 @@ public:
 	vector<string> &dictionaryList;
 	vector<string> &wordList;
 	queue<pair<SOCKET, Packet *>> &messageQueue;
-	mutex& mqMutex;
+	recursive_mutex& mqMutex;
 	int flag = 0;
 
-	ClientSession(SOCKET clientSock, vector<string> &wordList, vector<string> &dictionaryList, queue<pair<SOCKET, Packet *>> &messageQueue, mutex &mqMutex);
+	ClientSession(SOCKET clientSock, vector<string> &wordList, vector<string> &dictionaryList, queue<pair<SOCKET, Packet *>> &messageQueue, recursive_mutex&mqMutex);
 	void pushMQ(Packet* packet);
 	unsigned WINAPI handleClientSession();
 	void sendMsg(Packet* packet);

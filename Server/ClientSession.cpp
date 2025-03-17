@@ -4,12 +4,12 @@
 #include <string>
 #include <iostream>
 #include <queue>
-#include "ClientSession.h"
-#include "Constant.h"
+#include "clientSession.h"
+#include "constant.h"
 
 using namespace std;
 
-ClientSession::ClientSession(SOCKET clientSock, vector<string>& wordList, vector<string>& dictionaryList, queue<pair<SOCKET, Packet *>>& messageQueue, mutex& mqMutex)
+ClientSession::ClientSession(SOCKET clientSock, vector<string>& wordList, vector<string>& dictionaryList, queue<pair<SOCKET, Packet *>>& messageQueue, recursive_mutex& mqMutex)
 	: clientSock(clientSock), wordList(wordList), dictionaryList(dictionaryList), messageQueue(messageQueue), mqMutex(mqMutex) {
 }
 

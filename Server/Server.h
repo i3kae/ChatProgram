@@ -2,8 +2,9 @@
 #include <vector>
 #include <queue>
 #include <string>
-#include "Type.h"
-#include "ClientSession.h"
+#include <mutex>
+#include "type.h"
+#include "clientSession.h"
 
 using namespace std;
 
@@ -17,6 +18,8 @@ private:
     vector<string> dictionaryList;
     vector<string> wordList;
     queue<pair<SOCKET, Packet *>> messageQueue;
+    shared_ptr<mutex> mqMutex;
+
     int dictionaryCount = 0;
     int wordCount = 0;
 

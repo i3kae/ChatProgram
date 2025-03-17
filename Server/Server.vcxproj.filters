@@ -15,33 +15,33 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ClientSession.cpp">
+    <ClCompile Include="clientSession.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Server.cpp">
+    <ClCompile Include="server.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Utils.cpp">
+    <ClCompile Include="utils.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ClientSession.h">
+    <ClInclude Include="clientSession.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Constant.h">
+    <ClInclude Include="constant.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Type.h">
+    <ClInclude Include="type.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Utils.h">
+    <ClInclude Include="utils.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Server.h">
+    <ClInclude Include="server.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
