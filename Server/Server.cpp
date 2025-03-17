@@ -44,7 +44,7 @@ SOCKET Server::socketInit(u_short port, u_long ip) {
 	if (sock == INVALID_SOCKET)
 	{
 		cout << "소켓 생성 실패\n";
-		throw SERVER_ERROR_CODE::SOCKET_CREATE_ERROR;
+		throw SERVER_ERROR::SOCKET_CREATE_ERROR;
 	}
 
 	memset(&sockinfo, 0x00, sizeof(sockinfo));
@@ -58,7 +58,7 @@ SOCKET Server::socketInit(u_short port, u_long ip) {
 	if (bind(sock, (SOCKADDR*)&sockinfo, sizeof(sockinfo)) == SOCKET_ERROR)
 	{
 		cout << "bind 실패";
-		throw SERVER_ERROR_CODE::SOCKET_BIND_ERROR;
+		throw SERVER_ERROR::SOCKET_BIND_ERROR;
 	}
 
 	return sock;
@@ -71,7 +71,7 @@ void Server::serverStart(int backlog) {
 	if (listen(serverSock, backlog) == SOCKET_ERROR)
 	{
 		cout << "대기열 생성 실패\n";
-		throw SERVER_ERROR_CODE::SOCKET_LISTEN_ERROR;
+		throw SERVER_ERROR::SOCKET_LISTEN_ERROR;
 	}
 
 	cout << "클라이언트로부터 접속을 기다리고 있습니다...\n";
@@ -99,7 +99,7 @@ void Server::messageQueuing() {
 // 현재 clientSession에 연결되어 있는 모든 Client에 패킷 전송
 void Server::broadcastPacket(Packet *packet) {
 	for (ClientSession client : clientSession)
-		client.SendMsg(packet);
+		client.sendMsg(packet);
 }
 
 void Server::listenClient() {
@@ -117,12 +117,12 @@ void Server::listenClient() {
 		if (clientSock == INVALID_SOCKET)
 		{
 			cout << "클라이언트 소켓 연결 실패";
-			throw SERVER_ERROR_CODE::SOCKET_CON_ERROR;
+			throw SERVER_ERROR::SOCKET_CON_ERROR;
 		}
 		cout << "클라이언트 연결 성공 : " << clientSock << "\n";
 
 		clientSession.emplace_back(ClientSession(clientSock, wordList, dictionaryList, messageQueue, mqMutex));
-		thread t(&ClientSession::HandleClientRes, &clientSession[clientSession.size() - 1]);
+		thread t(&ClientSession::handleClientSession, &clientSession[clientSession.size() - 1]);
 		t.detach();
 	}
 }

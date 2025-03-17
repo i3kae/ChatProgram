@@ -16,7 +16,8 @@ public:
 	int flag = 0;
 
 	ClientSession(SOCKET clientSock, vector<string> &wordList, vector<string> &dictionaryList, queue<pair<SOCKET, Packet *>> &messageQueue, mutex &mqMutex);
-	void PushMsgQueue(Packet* packet);
-	unsigned WINAPI HandleClientRes();
-	void SendMsg(Packet* packet);
+	void pushMQ(Packet* packet);
+	unsigned WINAPI handleClientSession();
+	void sendMsg(Packet* packet);
+	void getServerRes(Packet* packet);
 };
