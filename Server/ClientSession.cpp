@@ -9,7 +9,7 @@
 
 using namespace std;
 
-ClientSession::ClientSession(SOCKET clientSock, vector<string>& wordList, vector<string>& dictionaryList, queue<pair<SOCKET, Packet *>>& messageQueue, recursive_mutex& mqMutex)
+ClientSession::ClientSession(SOCKET clientSock, vector<string>& wordList, vector<string>& dictionaryList, queue<pair<SOCKET, Packet *>>& messageQueue, mutex& mqMutex)
 	: clientSock(clientSock), wordList(wordList), dictionaryList(dictionaryList), messageQueue(messageQueue), mqMutex(mqMutex) {
 }
 
@@ -35,9 +35,8 @@ unsigned WINAPI ClientSession::handleClientSession() {
 
 // 전달 된 메시지를 메시지 큐에 전달
 void ClientSession::pushMQ(Packet* packet) {
-	mqMutex.lock();
+	lock_guard<mutex> lock(mqMutex);
 	messageQueue.push({ clientSock, packet });
-	mqMutex.unlock();
 }
 
 // 자신의 클라이언트에 메시지 전달
