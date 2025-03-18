@@ -11,8 +11,8 @@
 using namespace std;
 
 // IP를 지정해주지 않을 경우 모든 IP(0.0.0.0)에서 허용
-Server::Server(u_short port, vector<string> wordList, mutex& mqMutex, u_long ip)
-: ip(ip), port(port), wordList(wordList), wordCount(wordList.size()), mqMutex(mqMutex) {
+Server::Server(u_short port, vector<string> wordList, u_long ip)
+: ip(ip), port(port), wordList(wordList), wordCount(wordList.size()) {
 	this->WSAInit();
 	this->serverSock = this->socketInit(port, ip);
 }
@@ -95,7 +95,7 @@ void Server::messageQueuing() {
 
 // 현재 clientSession에 연결되어 있는 모든 Client에 패킷 전송
 void Server::broadcastPacket(Packet *packet) {
-	for (ClientSession client : clientSession)
+	for (ClientSession &client : clientSession)
 		client.sendMsg(packet);
 }
 
@@ -117,8 +117,8 @@ void Server::listenClient() {
 		}
 		cout << "클라이언트 연결 성공 : " << clientSock << "\n";
 
-		clientSession.emplace_back(ClientSession(clientSock, wordList, dictionaryList, messageQueue, mqMutex));
-		thread t(&ClientSession::handleClientSession, &clientSession.back());
+		clientSession.emplace_back(clientSock, wordList, dictionaryList, messageQueue, mqMutex);
+		thread t(&ClientSession::handleClientSession, std::ref(clientSession.back()));
 		t.detach();
 	}
 }

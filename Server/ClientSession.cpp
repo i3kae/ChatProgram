@@ -13,7 +13,12 @@ ClientSession::ClientSession(SOCKET clientSock, vector<string>& wordList, vector
 	: clientSock(clientSock), wordList(wordList), dictionaryList(dictionaryList), messageQueue(messageQueue), mqMutex(mqMutex) {
 }
 
-unsigned WINAPI ClientSession::handleClientSession() {
+ClientSession::~ClientSession() {
+	cout << "연결 종료 : " << clientSock << "\n";
+	closesocket(clientSock);
+}
+
+void ClientSession::handleClientSession() {
 	// recv 함수: 반환값이 받은 데이터 크기 , 실패하면 -1
 	try {
 		while (true) {
@@ -26,11 +31,6 @@ unsigned WINAPI ClientSession::handleClientSession() {
 		}
 	}
 	catch (const CLIENT_SESSION_ERROR &e) {}
-
-	// 소켓 연결 종료
-	cout << "연결 종료 : " << clientSock << "\n";
-	closesocket(clientSock);
-	return 0;
 }
 
 // 전달 된 메시지를 메시지 큐에 전달

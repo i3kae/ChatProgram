@@ -16,10 +16,10 @@ private:
     WSADATA wsa;
     u_long ip;
     u_short port;
+    mutex mqMutex;
     vector<string> dictionaryList;
     vector<string> wordList;
     queue<pair<SOCKET, Packet *>> messageQueue;
-    mutex &mqMutex;
 
     int dictionaryCount = 0;
     int wordCount = 0;
@@ -28,7 +28,7 @@ private:
     void messageQueuing();
     void listenClient();
 public:
-    Server(u_short port, vector<string> wordList, mutex& mqMutex, u_long ip = INADDR_ANY);
+    Server(u_short port, vector<string> wordList, u_long ip = INADDR_ANY);
     ~Server();
     void WSAInit();
     SOCKET socketInit(u_short port, u_long ip);
