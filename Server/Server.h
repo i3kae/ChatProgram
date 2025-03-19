@@ -24,13 +24,14 @@ private:
     int dictionaryCount = 0;
     int wordCount = 0;
 
+    void WSAInit();
+    SOCKET socketInit(u_short port, u_long ip);
     void broadcastPacket(Packet *packet);
     void messageQueuing();
     void listenClient();
 public:
     Server(u_short port, vector<string> wordList, u_long ip = INADDR_ANY);
     ~Server();
-    void WSAInit();
-    SOCKET socketInit(u_short port, u_long ip);
     void serverStart(int backlog);
+    void removeClientSession(ClientSession& session);
 };

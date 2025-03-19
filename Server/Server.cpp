@@ -118,7 +118,20 @@ void Server::listenClient() {
 		cout << "클라이언트 연결 성공 : " << clientSock << "\n";
 
 		clientSession.emplace_back(clientSock, wordList, dictionaryList, messageQueue, mqMutex);
-		thread t(&ClientSession::handleClientSession, std::ref(clientSession.back()));
+		ClientSession& session = std::ref(clientSession.back());
+		thread t([this, &session]() {
+			session.handleClientSession();
+			this->removeClientSession(session);
+		});
+		cout << clientSession.size() << "\n";
 		t.detach();
 	}
+}
+
+void Server::removeClientSession(ClientSession& session) {
+	SOCKET clientSock = session.clientSock;
+	list <ClientSession>::iterator iter = find_if(clientSession.begin(), clientSession.end(), [clientSock](const ClientSession& session) {
+		return clientSock == session.clientSock;
+		});
+	this->clientSession.erase(iter);
 }
