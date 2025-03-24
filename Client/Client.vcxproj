@@ -127,12 +127,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="chatWindow.cpp" />
     <ClCompile Include="client.cpp" />
+    <ClCompile Include="constant.h" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="type.h" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="chatWindow.h" />
     <ClInclude Include="client.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>

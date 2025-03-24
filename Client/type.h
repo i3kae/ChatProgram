@@ -3,6 +3,6 @@
 #include <string>
 
 typedef struct _packet {
-	int type; // 1이면 단어입력, 2이면 채팅
+	int len; // 패킷 버퍼의 길이
 	std::string buffer;
 }Packet;
