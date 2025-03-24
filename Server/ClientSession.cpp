@@ -24,9 +24,8 @@ void ClientSession::handleClientSession() {
 		while (true) {
 			Packet* packet = new Packet;
 			getServerRes(packet);
-			cout << "Type: " << packet->type << "\n";
+			cout << "Type: " << packet->len << "\n";
 			cout << "Buffer: " << packet->buffer << "\n";
-			packet->type = 2;
 			pushMQ(packet);
 		}
 	}
@@ -41,22 +40,18 @@ void ClientSession::pushMQ(Packet* packet) {
 
 // 자신의 클라이언트에 메시지 전달
 void ClientSession::sendMsg(Packet* packet) {
-	int len = packet->buffer.length();
-	send(clientSock, reinterpret_cast<char*>(&packet->type), sizeof(packet->type), 0);
-	send(clientSock, reinterpret_cast<char*>(&len), sizeof(len), 0);
-	if (len > 0)
-		send(clientSock, packet->buffer.c_str(), len, 0);
+	send(clientSock, reinterpret_cast<char*>(&packet->len), sizeof(packet->len), 0);
+	if (packet->len > 0)
+		send(clientSock, packet->buffer.c_str(), packet->len, 0);
 }
 
 void ClientSession::getServerRes(Packet* packet) {
-	int len = 0;
-	int res = recv(clientSock, reinterpret_cast<char*>(&packet->type), sizeof(packet->type), 0);
+	int res = recv(clientSock, reinterpret_cast<char*>(&packet->len), sizeof(packet->len), 0);
 	if (res < 0)
 		throw CLIENT_SESSION_ERROR::CLIENT_RECV_ERROR;
-	recv(clientSock, reinterpret_cast<char*>(&len), sizeof(len), 0);
-	if (len > 0) {
-		char* buffer = new char[len];
-		int recived = recv(clientSock, buffer, len, 0);
+	if (packet->len > 0) {
+		char* buffer = new char[packet->len];
+		int recived = recv(clientSock, buffer, packet->len, 0);
 		if (recived <= 0) {
 			delete[] buffer;
 			return;

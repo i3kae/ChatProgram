@@ -123,7 +123,6 @@ void Server::listenClient() {
 			session.handleClientSession();
 			this->removeClientSession(session);
 		});
-		cout << clientSession.size() << "\n";
 		t.detach();
 	}
 }
